@@ -24,19 +24,47 @@ export function Form() {
         updateTextAreaSize(textArea);
         textAreaRef.current = textArea;
     }, []);
+    const trpcUtils = api.useUtils();
 
     useLayoutEffect(() => {
         updateTextAreaSize(textAreaRef.current);
     }, [inputValue]);
 
     const session =  useSession();
+
     if (session.status !== "authenticated") return null;
 
     const createTweet = api.tweet.create.useMutation(
         {
             onSuccess: (newTweet) => {
-                console.log(newTweet);
                 setInputValue("");
+                
+                trpcUtils.tweet.infiniteFeed.setInfiniteData({}, (oldData) => {
+                    if (oldData == null || oldData.pages[0] == null) return;
+
+                    const newCachedTweet =  {
+                        ...newTweet,
+                        likeCount: 0,
+                        likeByMe: false,
+                        user: {
+                            id: session.data.user.id,
+                            name: session.data.user.name || null,
+                            image: session.data.user.image || null,
+                        }
+                    };
+
+                    return {
+                        ...oldData,
+                        pages: [
+                            {
+                                ...oldData.pages[0],
+                                tweets: [newCachedTweet, ...oldData.pages[0].tweets],
+                            },
+                            ...oldData.pages.slice(1),
+                        ]
+                    }
+                })
+                
             },
         }
     );
