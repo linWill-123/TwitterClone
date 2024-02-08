@@ -52,8 +52,12 @@ export const tweetRouter = createTRPCRouter({
 
 
 async function getInfiniteTweets({
-  whereClause,ctx,limit,cursor
-} : { whereClause?: Prisma.TweetWhereInput, 
+  whereClause,
+  ctx,
+  limit,
+  cursor
+} : { 
+  whereClause?: Prisma.TweetWhereInput, 
   limit: number, 
   cursor: {id: string, createdAt: Date} | undefined, 
   ctx: inferAsyncReturnType<typeof createTRPCContext> }) {
