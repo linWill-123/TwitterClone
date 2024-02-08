@@ -7,10 +7,16 @@ import { IconHoverEffect } from "~/components/IconHoverEffect";
 import { VscArrowLeft } from "react-icons/vsc";
 import Link from "next/link";
 import { ProfileImage } from "~/components/ProfileImage";
+import { InfiniteTweetList } from "~/components/InfiniteTweetList";
+import { useSession } from "next-auth/react";
+import { Button } from "~/components/Button";
 
 const ProfilePage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = 
 ({ id, }) => {
     const { data: profile } = api.profile.getById.useQuery({id});
+    const tweets = api.tweet.infiniteProfileFeed.useInfiniteQuery(
+        {userId:id}, {getNextPageParam: (lastPage) => lastPage.nextCursor}
+    )
 
     if ( profile == null || profile.name == null ) {
         return <ErrorPage statusCode={404} />
@@ -37,9 +43,35 @@ const ProfilePage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> =
                     {profile.followsCount}{" "} Following
                 </div>
             </div>
+            <FollowButton 
+                isFollowing={profile.isFollowing} 
+                userId={id} 
+                onClick={() => null} />
         </header>
+        <main>
+            <InfiniteTweetList 
+                tweets= {tweets.data?.pages.flatMap((page) => page.tweets)}
+                isError={tweets.isError}
+                isLoading={tweets.isLoading}
+                hasMore={tweets.hasNextPage}
+                fetchNewTweets={tweets.fetchNextPage} />
+        </main>
     </>
 };
+
+function FollowButton(
+    {userId, isFollowing, onClick}: {userId: string, isFollowing: boolean, onClick: () => void}) {
+
+    const session = useSession();
+
+    if (session.status !== "authenticated" || session.data.user.id === userId) {
+        return null;
+    }
+
+    return <Button onClick={onClick} small gray={isFollowing}>
+        {isFollowing ? "Unfollow" : "Follow"}
+    </Button>
+}
 
 const pluralRules = new Intl.PluralRules();
 function getPlural(number: number, singular: string, plural: string) {
