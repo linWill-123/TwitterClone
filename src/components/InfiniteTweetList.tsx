@@ -20,7 +20,7 @@ type Tweet = {
 type InfiniteTweetListProps = {
     isLoading: boolean,
     isError: boolean,
-    hasMore: boolean,
+    hasMore: boolean | undefined,
     fetchNewTweets: () => Promise<unknown>,
     tweets?: Tweet[]
 }
@@ -35,7 +35,7 @@ export function InfiniteTweetList( { tweets, isError, isLoading, fetchNewTweets,
     return <ul>
         <InfiniteScroll dataLength={tweets.length} 
                         next={fetchNewTweets}
-                        hasMore={hasMore}
+                        hasMore={hasMore ?? false}
                         loader={<LoadingSpinner/>} >
             { tweets.map(tweet => {
                 return <TweetCard key={tweet.id} {...tweet}/>;
