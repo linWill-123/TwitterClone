@@ -34,7 +34,7 @@ const ProfilePage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> =
     })
     
 
-    if ( profile == null || profile.name == null ) {
+    if ( profile?.name == null ) {
         return <ErrorPage statusCode={404} />
     }
 

@@ -40,7 +40,7 @@ export function Form() {
                 setInputValue("");
                 
                 trpcUtils.tweet.infiniteFeed.setInfiniteData({}, (oldData) => {
-                    if (oldData == null || oldData.pages[0] == null) return;
+                    if (oldData?.pages[0] == null) return;
 
                     const newCachedTweet =  {
                         ...newTweet,
@@ -48,8 +48,8 @@ export function Form() {
                         likeByMe: false,
                         user: {
                             id: session.data.user.id,
-                            name: session.data.user.name || null,
-                            image: session.data.user.image || null,
+                            name: session.data.user.name ?? null,
+                            image: session.data.user.image ?? null,
                         }
                     };
 
