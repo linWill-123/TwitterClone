@@ -70,6 +70,8 @@ export const profileRouter = createTRPCRouter({
             }
 
             // Revalidation: used to invalidate old data in SSG, prompts SSG to regenerate web data upon update
+            void ctx.revalidateSSG?.(`/profiles/${userId}`);
+            void ctx.revalidateSSG?.(`/profiles/${currentUserId}`);
 
             return { addedFollow }
         }),

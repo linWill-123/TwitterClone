@@ -17,11 +17,19 @@ const ProfilePage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> =
     const tweets = api.tweet.infiniteProfileFeed.useInfiniteQuery(
         {userId:id}, {getNextPageParam: (lastPage) => lastPage.nextCursor}
     )
+    const trpcUtils = api.useUtils();
     const toggleFollow = api.profile.toggleFollow.useMutation({
-        onSuccess: ({
+        onSuccess: ({ addedFollow }) => {
+            trpcUtils.profile.getById.setData({id}, oldData => {
+                if (oldData == null) return;
 
-        }) => {
-            
+                const countModifier = addedFollow ? 1 : -1;
+                return {
+                    ...oldData, 
+                    isFollowing: addedFollow, 
+                    followersCount: oldData.followersCount + countModifier,
+                };
+            })
         }
     })
     
